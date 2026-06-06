@@ -1,11 +1,11 @@
-CREATE TABLE reservation_time
+CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
     start_at TIME   NOT NULL,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE theme
+CREATE TABLE IF NOT EXISTS theme
 (
     id          BIGINT        NOT NULL AUTO_INCREMENT,
     name        VARCHAR(50)   NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE theme
     PRIMARY KEY (id)
 );
 
-CREATE TABLE slot
+CREATE TABLE IF NOT EXISTS slot
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
     `date`   DATE   NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE slot
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
 
-CREATE TABLE waiting
+CREATE TABLE IF NOT EXISTS waiting
 (
     id         BIGINT      NOT NULL AUTO_INCREMENT,
     created_at TIMESTAMP   NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE waiting
     FOREIGN KEY (slot_id) REFERENCES slot (id)
 );
 
-CREATE TABLE reservation
+CREATE TABLE IF NOT EXISTS reservation
 (
     id      BIGINT      NOT NULL AUTO_INCREMENT,
     name    VARCHAR(50) NOT NULL,
@@ -47,5 +47,5 @@ CREATE TABLE reservation
 );
 
 -- 1순위 대기자 조회 + 순번 계산 서브쿼리
-CREATE INDEX idx_waiting_slot_created_id
+CREATE INDEX IF NOT EXISTS idx_waiting_slot_created_id
     ON waiting (slot_id, created_at, id);

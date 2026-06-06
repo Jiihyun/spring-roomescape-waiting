@@ -10,10 +10,34 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.AcceptanceTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import roomescape.fixture.ApiFixtureGenerator;
+import roomescape.fixture.FixtureGeneratorConfig;
 
-public class ReservationControllerTest extends AcceptanceTest {
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@Import(FixtureGeneratorConfig.class)
+public class ReservationControllerTest {
+
+    @LocalServerPort
+    private int port;
+
+
+    @Autowired
+    private ApiFixtureGenerator apiFixtureGenerator;
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+    }
 
     @Test
     void 예약을_생성한다() {
@@ -48,12 +72,7 @@ public class ReservationControllerTest extends AcceptanceTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "name", "로지",
-                        "date", reservationDate.toString(),
-                        "timeId", timeId,
-                        "themeId", themeId1
-                ))
+                .body(Map.of("name", "로지", "date", reservationDate.toString(), "timeId", timeId, "themeId", themeId1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
@@ -61,12 +80,7 @@ public class ReservationControllerTest extends AcceptanceTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "name", "러키",
-                        "date", reservationDate.toString(),
-                        "timeId", timeId,
-                        "themeId", themeId2
-                ))
+                .body(Map.of("name", "러키", "date", reservationDate.toString(), "timeId", timeId, "themeId", themeId2))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
@@ -111,12 +125,9 @@ public class ReservationControllerTest extends AcceptanceTest {
     void 예약을_수정한다() {
         long originalTimeId = apiFixtureGenerator.createTime("10:00");
         long changedTimeId = apiFixtureGenerator.createTime("11:00");
-
         LocalDate originalDate = LocalDate.of(2099, 5, 31);
         LocalDate changedDate = LocalDate.of(2099, 6, 1);
-
         long themeId = apiFixtureGenerator.createTheme("방탈출1", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
-
         long reservationId = apiFixtureGenerator.createReservation("브라운", originalDate, originalTimeId, themeId);
 
         Map<String, Object> updateParams = new HashMap<>();
@@ -138,7 +149,6 @@ public class ReservationControllerTest extends AcceptanceTest {
         long timeId = apiFixtureGenerator.createTime("10:00");
         long themeId = apiFixtureGenerator.createTheme("방탈출11", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
         LocalDate reservationDate = LocalDate.of(2099, 5, 31);
-
         long reservationId = apiFixtureGenerator.createReservation("브라운", reservationDate, timeId, themeId);
 
         RestAssured.given().log().all()

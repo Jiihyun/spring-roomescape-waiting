@@ -7,11 +7,35 @@ import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.AcceptanceTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.dto.response.AvailableReservationTimeResponse;
+import roomescape.fixture.ApiFixtureGenerator;
+import roomescape.fixture.FixtureGeneratorConfig;
 
-public class ReservationTimeControllerTest extends AcceptanceTest {
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@Import(FixtureGeneratorConfig.class)
+public class ReservationTimeControllerTest {
+
+    @LocalServerPort
+    private int port;
+
+
+    @Autowired
+    private ApiFixtureGenerator apiFixtureGenerator;
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+    }
 
     @Test
     void 시간을_조회한다() {
@@ -31,9 +55,6 @@ public class ReservationTimeControllerTest extends AcceptanceTest {
 
         assertThat(responses)
                 .extracting("startAt", "reserved")
-                .contains(
-                        tuple(LocalTime.of(22, 0), true)
-                );
+                .contains(tuple(LocalTime.of(22, 0), true));
     }
-
 }
