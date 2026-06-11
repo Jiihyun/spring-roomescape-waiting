@@ -73,16 +73,17 @@ public class WaitingDao {
         }
     }
 
-    public Optional<Waiting> findFirstBySlot(long slotId) {
+    public Optional<Waiting> findFirstBySlotForUpdate(long slotId) {
         String sql = """
-                SELECT id, 
+                SELECT id,
                        created_at,
                        slot_id,
                        name
                 FROM waiting
                     WHERE slot_id = ?
                 ORDER BY created_at ASC, id ASC
-                LIMIT 1;
+                LIMIT 1
+                FOR UPDATE;
                 """;
         try {
             return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, slotId));

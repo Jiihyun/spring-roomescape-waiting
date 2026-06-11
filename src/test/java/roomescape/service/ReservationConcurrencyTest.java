@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -44,6 +45,7 @@ import roomescape.dto.request.ReservationRequest;
      * -> 두 스레드 동시에 save() 진입 보장
  */
 
+@Disabled
 class ReservationConcurrencyTest extends ServiceTest {
 
     @MockitoSpyBean

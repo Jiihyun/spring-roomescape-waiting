@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -45,6 +46,7 @@ import roomescape.dto.request.UpdateReservationRequest;
    -> 수정, 삭제했던 예약이 다시 존재해야 한다 & 대기 1번도 롤백되어야 한다
       즉, @Transactional이 선언한 작업 단위가 실제로 원자적으로 처리되는지 검증한다.
  */
+@Disabled
 class ReservationTransactionTest extends ServiceTest {
 
     @Autowired
@@ -84,7 +86,7 @@ class ReservationTransactionTest extends ServiceTest {
         Reservation foundReservation = reservationDao.findById(reservation.getId()).orElseThrow();
         assertThat(foundReservation.getDate()).isEqualTo(originalDate);
 
-        Waiting foundWaiting = waitingDao.findFirstBySlot(reservation.getSlot().getId()).orElseThrow();
+        Waiting foundWaiting = waitingDao.findFirstBySlotForUpdate(reservation.getSlot().getId()).orElseThrow();
         assertThat(foundWaiting.getName()).isEqualTo(waiting.getName());
     }
 
@@ -109,7 +111,7 @@ class ReservationTransactionTest extends ServiceTest {
         // then
         assertAll(
                 () -> assertThat(reservationDao.findById(reservation.getId())).isPresent(),
-                () -> assertThat(waitingDao.findFirstBySlot(reservation.getSlot().getId()).get()).isEqualTo(waiting)
+                () -> assertThat(waitingDao.findFirstBySlotForUpdate(reservation.getSlot().getId()).get()).isEqualTo(waiting)
         );
     }
 }

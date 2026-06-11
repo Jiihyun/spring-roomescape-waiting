@@ -139,7 +139,7 @@ public class ReservationService {
     }
 
     private void promoteFirstWaiting(Slot previousSlot) {
-        waitingDao.findFirstBySlot(previousSlot.getId()).ifPresentOrElse(
+        waitingDao.findFirstBySlotForUpdate(previousSlot.getId()).ifPresentOrElse(
                 waiting -> {
                     reservationDao.save(new Reservation(previousSlot, waiting.getName()));
                     waitingDao.delete(waiting.getId());
