@@ -3,6 +3,8 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
@@ -26,6 +28,8 @@ import roomescape.exception.domain.ThemeException;
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
+
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
 
     private final SlotService slotService;
 
@@ -101,6 +105,7 @@ public class ReservationService {
         reservationDao.update(updatedReservation);
 
         promoteFirstWaiting(previousSlot);
+        log.info("예약 수정: reservationId={}", reservationId);
         return ReservationResponse.from(updatedReservation);
     }
 
@@ -134,10 +139,15 @@ public class ReservationService {
     }
 
     private void promoteFirstWaiting(Slot previousSlot) {
-        waitingDao.findFirstBySlot(previousSlot.getId()).ifPresent(waiting -> {
-            reservationDao.save(new Reservation(previousSlot, waiting.getName()));
-            waitingDao.delete(waiting.getId());
-        });
+        waitingDao.findFirstBySlot(previousSlot.getId()).ifPresentOrElse(
+                waiting -> {
+                    reservationDao.save(new Reservation(previousSlot, waiting.getName()));
+                    waitingDao.delete(waiting.getId());
+                    log.info("대기 승격: waitingId={}, name={}, slotId={}",
+                            waiting.getId(), waiting.getName(), previousSlot.getId());
+                },
+                () -> log.debug("승격할 대기자 없음: slotId={}", previousSlot.getId())
+        );
     }
 
     @Transactional
@@ -147,6 +157,7 @@ public class ReservationService {
         reservationDao.delete(reservationId);
 
         promoteFirstWaiting(reservation.getSlot());
+        log.info("예약 삭제: reservationId={}", reservationId);
     }
 
     private Reservation getReservation(long reservationId) {
